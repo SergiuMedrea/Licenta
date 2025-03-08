@@ -68,10 +68,34 @@ async function checkPhishingUrl(url) {
     return phishingDatabase[url];
   }
   
-  // Extract URL features using the function from the UCI model
+  // Extract URL features using the improved function from the UCI model
   const features = extractUCIFeatures(url);
   
-  // Use the model for prediction
+  // Additional context: Look for suspicious patterns in the URL
+  const lowerUrl = url.toLowerCase();
+  
+  // Suspicious TLD check (some TLDs are more commonly used in phishing)
+  const suspiciousTLDs = ['.tk', '.ml', '.ga', '.cf', '.gq', '.xyz', '.top', '.work'];
+  if (suspiciousTLDs.some(tld => lowerUrl.endsWith(tld))) {
+    features.suspicious_tld = 1;
+  }
+  
+  // Suspicious URL patterns
+  const patterns = [
+    { pattern: /secure.*bank|bank.*secure/, weight: 0.5 },
+    { pattern: /login.*confirm|confirm.*login/, weight: 0.4 },
+    { pattern: /account.*verify|verify.*account/, weight: 0.4 },
+    { pattern: /update.*password|password.*update/, weight: 0.3 },
+    { pattern: /[-_.]{3,}/, weight: 0.3 } // Multiple special characters
+  ];
+  
+  for (const { pattern, weight } of patterns) {
+    if (pattern.test(lowerUrl)) {
+      features.suspicious_pattern = (features.suspicious_pattern || 0) + weight;
+    }
+  }
+  
+  // Use the improved model for prediction
   const prediction = predictPhishing(features);
   
   // Save the result in cache
@@ -81,6 +105,11 @@ async function checkPhishingUrl(url) {
     timestamp: Date.now(),
     features: features
   };
+  
+  // Log for debugging
+  console.log("URL check:", url);
+  console.log("Features:", features);
+  console.log("Score:", prediction.score, "Is Phishing:", prediction.isPhishing);
   
   return phishingDatabase[url];
 }
@@ -123,3 +152,53 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 });
+
+function debugURL(url) {
+  console.log("=== URL DEBUG INFO ===");
+  console.log("URL:", url);
+  
+  // Extract features using your existing extractor
+  const features = extractUCIFeatures(url);
+  console.log("Extracted Features:", features);
+  
+  // Add additional context for debugging
+  try {
+    const urlObj = new URL(url);
+    console.log("URL parts:");
+    console.log("- Protocol:", urlObj.protocol);
+    console.log("- Hostname:", urlObj.hostname);
+    console.log("- Path:", urlObj.pathname);
+    console.log("- Search:", urlObj.search);
+    
+    // Check for specific suspicious patterns
+    const suspicious = [];
+    
+    if (features.double_slash_redirecting) 
+      suspicious.push("Double slash redirect");
+    
+    if (features.having_sub_domain > 0.5) 
+      suspicious.push("Multiple subdomains");
+    
+    if (features.sslfinal_state === 1) 
+      suspicious.push("Missing HTTPS");
+    
+    if (features.prefix_suffix === 1) 
+      suspicious.push("Hyphen in domain");
+    
+    if (urlObj.hostname.includes('secure') || urlObj.hostname.includes('bank')) 
+      suspicious.push("Suspicious keywords in hostname");
+    
+    if (suspicious.length > 0) {
+      console.log("Suspicious patterns detected:", suspicious.join(", "));
+    }
+  } catch (e) {
+    console.error("Error parsing URL:", e);
+  }
+  
+  // Use your existing prediction function
+  const prediction = predictPhishing(features);
+  console.log("Prediction:", prediction);
+  console.log("=====================");
+  
+  return prediction;
+}

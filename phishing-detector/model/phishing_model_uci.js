@@ -62,12 +62,19 @@ function predictPhishing(features) {
   let score = 0;
   let totalWeight = 0;
   
-  // Check if all necessary features exist
+  // Normalize feature names to lowercase for case-insensitive matching
+  const normalizedFeatures = {};
+  for (const [key, value] of Object.entries(features)) {
+    normalizedFeatures[key.toLowerCase()] = value;
+  }
+  
+  // Check each feature from the model's importance list
   for (const [feature, weight] of Object.entries(phishingModel.feature_importances)) {
-    if (features[feature] !== undefined) {
-      // Normalize numerical features to values between 0 and 1
-      // Binary features (0/1) remain unchanged
-      const value = features[feature];
+    const featureLower = feature.toLowerCase();
+    
+    if (normalizedFeatures[featureLower] !== undefined) {
+      // Get the feature value
+      const value = normalizedFeatures[featureLower];
       
       // Calculate weighted score
       score += weight * value;
@@ -80,6 +87,38 @@ function predictPhishing(features) {
     score = score / totalWeight;
   }
   
+  // Additional scoring for suspicious URL patterns
+  // These are common in phishing sites but might not be in the original feature set
+  if (normalizedFeatures['double_slash_redirecting'] === 1) {
+    score += 0.1;
+  }
+  
+  if (normalizedFeatures['prefix_suffix'] === 1 || normalizedFeatures['prefix_suffix'] === 1) {
+    score += 0.1;
+  }
+  
+  if (features.hasOwnProperty('sslfinal_state') && features['sslfinal_state'] === 1) {
+    score += 0.15; // Missing HTTPS is a strong phishing indicator
+  }
+  
+  // Check for suspicious keywords in the URL
+  const url = features.url || '';
+  const suspiciousTerms = ['login', 'secure', 'bank', 'account', 'confirm', 'verify', 'update'];
+  let termCount = 0;
+  
+  for (const term of suspiciousTerms) {
+    if (url.toLowerCase().includes(term)) {
+      termCount++;
+    }
+  }
+  
+  if (termCount >= 2) {
+    score += 0.1 * Math.min(termCount, 3); // Cap the bonus at 3 terms
+  }
+  
+  // Cap score at 1.0
+  score = Math.min(score, 1.0);
+  
   // Final prediction (with threshold of 0.5)
   return {
     score: score,
@@ -88,14 +127,37 @@ function predictPhishing(features) {
   };
 }
 
+// Check if URL is valid for analysis
+function isValidUrl(url) {
+  // Skip browser internal pages and file URLs
+  if (url.startsWith('chrome://') || 
+      url.startsWith('chrome-extension://') || 
+      url.startsWith('file://') ||
+      url.startsWith('about:') ||
+      url.startsWith('edge://') ||
+      url.startsWith('firefox://')) {
+    return false;
+  }
+  
+  return true;
+}
+
 // Define a function for mapping UCI ML features to JavaScript features
 function extractUCIFeatures(url, domContent = null) {
+  // Check if URL is valid for analysis
+  if (!isValidUrl(url)) {
+    return {};
+  }
+
   // Initialize all model features with default values
   const features = {};
   
+  // Store the original URL for additional checks
+  features.url = url;
+  
   // Set all features to 0 initially
   for (const feature of phishingModel.feature_names) {
-    features[feature] = 0;
+    features[feature.toLowerCase()] = 0;
   }
   
   try {
@@ -104,43 +166,66 @@ function extractUCIFeatures(url, domContent = null) {
     // ===== Address Bar Based Features =====
     
     // Feature 1: having_IP_Address
-    features['having_IP_Address'] = /^\d+\.\d+\.\d+\.\d+$/.test(urlObj.hostname) ? 1 : 0;
+    features['having_ip_address'] = /^\d+\.\d+\.\d+\.\d+$/.test(urlObj.hostname) ? 1 : 0;
     
     // Feature 2: URL_Length
-    features['URL_Length'] = url.length > 54 ? 1 : 0;
+    features['url_length'] = url.length > 54 ? 1 : (url.length > 30 ? 0.5 : 0);
     
     // Feature 3: Shortining_Service
-    const shortURLServices = ['bit.ly', 'goo.gl', 't.co', 'tinyurl.com', 'is.gd'];
-    features['Shortining_Service'] = shortURLServices.some(service => 
+    const shortURLServices = ['bit.ly', 'goo.gl', 't.co', 'tinyurl.com', 'is.gd', 'tiny.cc', 'ow.ly'];
+    features['shortining_service'] = shortURLServices.some(service => 
       url.includes(service)) ? 1 : 0;
     
     // Feature 4: having_At_Symbol
-    features['having_At_Symbol'] = url.includes('@') ? 1 : 0;
+    features['having_at_symbol'] = url.includes('@') ? 1 : 0;
     
     // Feature 5: double_slash_redirecting
     const lastDoubleSlash = url.lastIndexOf('//');
     features['double_slash_redirecting'] = lastDoubleSlash > 7 ? 1 : 0;
     
     // Feature 6: Prefix_Suffix
-    features['Prefix_Suffix'] = urlObj.hostname.includes('-') ? 1 : 0;
+    features['prefix_suffix'] = urlObj.hostname.includes('-') ? 1 : 0;
     
     // Feature 7: having_Sub_Domain
     const dotCount = urlObj.hostname.split('.').length - 1;
     if (dotCount == 1) {
-      features['having_Sub_Domain'] = 0; // Legitimate
+      features['having_sub_domain'] = 0; // Legitimate
     } else if (dotCount == 2) {
-      features['having_Sub_Domain'] = 0.5; // Suspicious
+      features['having_sub_domain'] = 0.5; // Suspicious
     } else {
-      features['having_Sub_Domain'] = 1; // Phishing
+      features['having_sub_domain'] = 1; // Phishing
     }
     
     // Feature 8: SSLfinal_State
-    features['SSLfinal_State'] = urlObj.protocol === 'https:' ? 0 : 1;
+    features['sslfinal_state'] = urlObj.protocol === 'https:' ? 0 : 1;
     
     // Feature 12: HTTPS_token
-    features['HTTPS_token'] = urlObj.hostname.includes('https') ? 1 : 0;
+    features['https_token'] = urlObj.hostname.includes('https') ? 1 : 0;
     
-    // Other features can be implemented similarly
+    // Enhanced detection: Check if URL contains bank-related keywords
+    const suspiciousHostPatterns = [
+      /bank/, /secure/, /login/, /signin/, /verify/, /confirm/, /update/, /account/
+    ];
+    
+    if (suspiciousHostPatterns.some(pattern => pattern.test(urlObj.hostname))) {
+      // If hostname contains suspicious keywords but isn't a major bank domain
+      const majorBankDomains = ['chase.com', 'bankofamerica.com', 'wellsfargo.com', 'citibank.com'];
+      if (!majorBankDomains.some(domain => urlObj.hostname.endsWith(domain))) {
+        features['abnormal_url'] = 1;
+      }
+    }
+    
+    // Check for redirect in path
+    if (urlObj.pathname.includes('redirect') || urlObj.pathname.includes('forward') || 
+        urlObj.pathname.includes('goto') || urlObj.pathname.includes('return')) {
+      features['redirect'] = 1;
+    }
+    
+    // Check for unusual number of dots or special characters in hostname
+    const specialCharCount = urlObj.hostname.replace(/[a-zA-Z0-9.]/g, '').length;
+    if (specialCharCount > 1) {
+      features['abnormal_url'] = Math.max(features['abnormal_url'] || 0, 0.5);
+    }
     
   } catch (error) {
     console.error("Error extracting features:", error);
