@@ -1,5 +1,3 @@
-// options.js - JavaScript for the settings page
-
 // Default settings
 const defaultSettings = {
     detectionThreshold: 0.5,
