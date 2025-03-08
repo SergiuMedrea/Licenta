@@ -1,5 +1,3 @@
-// popup.js - Enhanced script for the phishing detector popup interface
-
 // Feature descriptions for displaying to users
 const featureDescriptions = {
   having_IP_Address: "IP address used in domain",

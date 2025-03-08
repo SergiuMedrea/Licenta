@@ -9,7 +9,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "images/icon16.png",
       "32": "images/icon32.png",
@@ -25,11 +25,11 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["warning.html", "warning.js", "phishing_model_uci.js"],
+      "resources": ["warning/warning.html", "warning/warning.js", "model/phishing_model_uci.js"],
       "matches": ["<all_urls>"]
     }
   ],
-  "options_page": "options.html",
+  "options_page": "options/options.html",
   "icons": {
     "16": "images/icon16.png",
     "32": "images/icon32.png",

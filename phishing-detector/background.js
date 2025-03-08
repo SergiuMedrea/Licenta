@@ -1,5 +1,5 @@
 // Import the UCI Phishing Websites model
-importScripts('phishing_model_uci.js');
+importScripts('model/phishing_model_uci.js');
 
 // Cache for checked URLs
 let phishingDatabase = {};
