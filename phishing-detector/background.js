@@ -4,6 +4,9 @@ importScripts('model/phishing_model_uci.js');
 // Cache for checked URLs
 let phishingDatabase = {};
 
+// Track warning page redirections to prevent loops
+let redirectedTabsMap = new Map();
+
 // Load the model and initial settings
 chrome.runtime.onInstalled.addListener(async () => {
   try {
@@ -32,15 +35,25 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   // Ignore navigations to the warning page
   if (url.includes('warning.html')) return;
   
+  // Check if this URL has already been approved by the user
+  if (redirectedTabsMap.has(tabId) && redirectedTabsMap.get(tabId) === url) {
+    // User chose to proceed - don't show warning again for this navigation
+    redirectedTabsMap.delete(tabId);
+    return;
+  }
+  
+  // Check if URL is valid for analysis
+  if (!isValidUrl(url)) return;
+  
   try {
     // Check if the URL is potentially phishing
     const result = await checkPhishingUrl(url);
     
     if (result.isPhishing) {
       console.log("Phishing site detected!");
-      // Warn the user
+      // Redirect to warning page
       chrome.tabs.update(tabId, {
-        url: `warning.html?target=${encodeURIComponent(url)}&score=${result.score}`
+        url: chrome.runtime.getURL(`warning/warning.html?target=${encodeURIComponent(url)}&score=${result.score}`)
       });
       
       // Update statistics
@@ -143,11 +156,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   
   if (message.action === 'proceedAnyway') {
+    const tabId = message.tabId;
+    const targetUrl = message.url;
+    
+    // Mark this tab as approved for the dangerous URL
+    redirectedTabsMap.set(tabId, targetUrl);
+    
+    // Navigate to the requested URL
+    chrome.tabs.update(tabId, { url: targetUrl });
+    
     // Update statistics
     chrome.storage.local.get(['proceedCount'], function(result) {
       const currentCount = result.proceedCount || 0;
       chrome.storage.local.set({ proceedCount: currentCount + 1 });
     });
+    
     sendResponse({ success: true });
     return true;
   }
