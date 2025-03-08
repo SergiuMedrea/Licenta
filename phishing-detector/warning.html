@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Avertizare de Securitate</title>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8d7da;
+      color: #721c24;
+      text-align: center;
+      padding: 50px;
+      margin: 0;
+    }
+    .warning-container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .warning-icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #721c24;
+    }
+    .url-display {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      word-break: break-all;
+      margin: 20px 0;
+      font-family: monospace;
+    }
+    .buttons {
+      margin-top: 30px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .back-button {
+      background-color: #6c757d;
+      color: white;
+    }
+    .proceed-button {
+      background-color: #dc3545;
+      color: white;
+    }
+    .risk-score {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="warning-container">
+    <div class="warning-icon">⚠️</div>
+    <h1>Avertizare de Securitate</h1>
+    <p>Site-ul pe care încercați să îl accesați a fost identificat ca posibil site de phishing.</p>
+    
+    <div class="url-display" id="dangerousUrl">
+      <!-- URL-ul va fi afișat aici prin JavaScript -->
+    </div>
+    
+    <div class="risk-score">
+      Scor de risc: <span id="riskScore">-</span>
+    </div>
+    
+    <p>Acest site poate încerca să vă fure informații personale precum parole, date de card sau alte informații sensibile.</p>
+    
+    <div class="buttons">
+      <button class="back-button" id="backButton">Înapoi la siguranță</button>
+      <button class="proceed-button" id="proceedButton">Continuă oricum (Periculos)</button>
+    </div>
+  </div>
+  
+  <!-- Referință la scriptul extern în loc de script inline -->
+  <script src="warning.js"></script>
+</body>
+</html>

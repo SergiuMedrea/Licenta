@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Phishing Detector</title>
+  <style>
+    body {
+      width: 300px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .status-indicator {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .safe {
+      background-color: green;
+    }
+    .suspicious {
+      background-color: orange;
+    }
+    .dangerous {
+      background-color: red;
+    }
+    .stats {
+      margin-top: 15px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Phishing Detector</h2>
+  
+  <div class="status">
+    <div id="statusIndicator" class="status-indicator"></div>
+    <div id="statusText">Verificare site...</div>
+  </div>
+  
+  <div id="details">
+    <p>URL: <span id="currentUrl">-</span></p>
+    <p>Scor de risc: <span id="riskScore">-</span></p>
+  </div>
+  
+  <div class="stats">
+    <p>Total site-uri verificate: <span id="totalChecked">0</span></p>
+    <p>Site-uri de phishing blocate: <span id="totalBlocked">0</span></p>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
