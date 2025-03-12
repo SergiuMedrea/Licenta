@@ -108,33 +108,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     
-    try {
-      // Request URL check from background script
-      const result = await new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage(
-          { action: 'checkUrl', url: url },
-          response => {
-            if (chrome.runtime.lastError) {
-              console.error("Communication error:", chrome.runtime.lastError);
-              reject(chrome.runtime.lastError);
-            } else {
-              console.log("Response received:", response);
-              resolve(response);
+    // Only analyze if real-time protection is enabled
+    if (settings.enableRealTimeProtection) {
+      try {
+        // Request URL check from background script
+        const result = await new Promise((resolve, reject) => {
+          chrome.runtime.sendMessage(
+            { action: 'checkUrl', url: url },
+            response => {
+              if (chrome.runtime.lastError) {
+                console.error("Communication error:", chrome.runtime.lastError);
+                reject(chrome.runtime.lastError);
+              } else {
+                console.log("Response received:", response);
+                resolve(response);
+              }
             }
-          }
-        );
-      });
-      
-      // Process and display the result
-      processResult(result, settings);
-      
-      // Load statistics
-      loadStats();
-    } catch (error) {
-      console.error("Error checking URL:", error);
+          );
+        });
+        
+        // Process and display the result
+        processResult(result, settings);
+      } catch (error) {
+        console.error("Error checking URL:", error);
+        updateStatus('unknown');
+        showMessage("Error analyzing the site");
+      }
+    } else {
+      // Show that real-time protection is disabled
       updateStatus('unknown');
-      showMessage("Error analyzing the site");
+      showMessage("Real-time protection is disabled. Click 'Scan Now' to analyze this page.");
     }
+    
+    // Load statistics
+    loadStats();
   } catch (error) {
     console.error("Error getting current tab:", error);
     updateStatus('unknown');
@@ -334,14 +341,43 @@ function setupEventListeners() {
     try {
       const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
       const currentTab = tabs[0];
+      const url = currentTab.url;
       
-      // Reload the current page
-      chrome.tabs.reload(currentTab.id);
+      // Show loader
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('loaderSection').style.display = 'flex';
       
-      // Close the popup
-      window.close();
+      // Request URL check from background script (always perform when manually requested)
+      try {
+        const result = await new Promise((resolve, reject) => {
+          chrome.runtime.sendMessage(
+            { action: 'checkUrl', url: url },
+            response => {
+              if (chrome.runtime.lastError) {
+                console.error("Communication error:", chrome.runtime.lastError);
+                reject(chrome.runtime.lastError);
+              } else {
+                console.log("Response received:", response);
+                resolve(response);
+              }
+            }
+          );
+        });
+        
+        // Process and display the result
+        const settings = await loadSettings();
+        processResult(result, settings);
+        
+        // Hide loader, show content
+        hideLoader();
+      } catch (error) {
+        console.error("Error checking URL:", error);
+        updateStatus('unknown');
+        showMessage("Error analyzing the site");
+        hideLoader();
+      }
     } catch (error) {
-      console.error("Error reloading page:", error);
+      console.error("Error scanning page:", error);
     }
   });
   
