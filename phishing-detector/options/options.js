@@ -2,7 +2,6 @@
 const defaultSettings = {
     detectionThreshold: 0.5,
     enableRealTimeProtection: true,
-    notifyOnBlock: true,
     showExtendedInfo: true,
     whitelist: [],
     updateFrequency: 'weekly',
@@ -73,7 +72,6 @@ const defaultSettings = {
     
     // Toggle switches
     document.getElementById('enableRealTimeProtection').checked = settings.enableRealTimeProtection;
-    document.getElementById('notifyOnBlock').checked = settings.notifyOnBlock;
     document.getElementById('showExtendedInfo').checked = settings.showExtendedInfo;
     document.getElementById('collectAnonymousStats').checked = settings.collectAnonymousStats;
     
@@ -91,7 +89,6 @@ const defaultSettings = {
     // Get values from form elements
     const detectionThreshold = parseFloat(document.getElementById('detectionThreshold').value);
     const enableRealTimeProtection = document.getElementById('enableRealTimeProtection').checked;
-    const notifyOnBlock = document.getElementById('notifyOnBlock').checked;
     const showExtendedInfo = document.getElementById('showExtendedInfo').checked;
     const collectAnonymousStats = document.getElementById('collectAnonymousStats').checked;
     
@@ -109,7 +106,6 @@ const defaultSettings = {
     return {
       detectionThreshold,
       enableRealTimeProtection,
-      notifyOnBlock,
       showExtendedInfo,
       whitelist,
       updateFrequency,

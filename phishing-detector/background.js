@@ -31,7 +31,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   if (!settings.enableRealTimeProtection) {
     return; // Exit early if real-time protection is disabled
   }
-  
+
   // Check only the main frame
   if (details.frameId !== 0) return;
 
@@ -223,7 +223,6 @@ async function loadSettings() {
     return {
       detectionThreshold: 0.5,
       enableRealTimeProtection: true,
-      notifyOnBlock: true,
       showExtendedInfo: true,
       whitelist: [],
       ...(data.settings || {}),
@@ -233,7 +232,6 @@ async function loadSettings() {
     return {
       detectionThreshold: 0.5,
       enableRealTimeProtection: true,
-      notifyOnBlock: true,
       showExtendedInfo: true,
       whitelist: [],
     };

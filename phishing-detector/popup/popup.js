@@ -74,7 +74,6 @@ const defaultSettings = {
   detectionThreshold: 0.5, // Default threshold for classifying as phishing
   showExtendedInfo: true,  // Show detailed feature information
   enableRealTimeProtection: true, // Enable real-time protection
-  notifyOnBlock: true // Show notifications when sites are blocked
 };
 
 // Initialize the popup
