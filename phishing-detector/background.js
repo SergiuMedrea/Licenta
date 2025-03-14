@@ -38,6 +38,23 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   const url = details.url;
   const tabId = details.tabId;
 
+  // Extract domain from URL
+  let domain;
+  try {
+    domain = new URL(url).hostname;
+  } catch (e) {
+    domain = "";
+  }
+
+  // Check if domain is in whitelist
+  if (
+    settings.whitelist &&
+    settings.whitelist.some((item) => domain.includes(item))
+  ) {
+    console.log("Site is in whitelist, skipping check:", domain);
+    return; // Skip phishing check for whitelisted domains
+  }
+
   // Ignore navigations to the warning page
   if (url.includes("warning.html")) return;
 

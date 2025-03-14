@@ -96,7 +96,17 @@ const defaultSettings = {
     const whitelistText = document.getElementById('whitelist').value;
     const whitelist = whitelistText
       .split('\n')
-      .map(domain => domain.trim())
+      .map(entry => {
+        // Strip protocol and trailing slashes
+        try {
+          const url = new URL(entry.trim());
+          console.log(url);
+          return url.hostname; // Just return the domain part
+        } catch {
+          // If it's not a valid URL, just return the trimmed entry
+          return entry.trim();
+        }
+      })
       .filter(domain => domain.length > 0);
     
     // Get update frequency
