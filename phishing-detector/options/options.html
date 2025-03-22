@@ -1,119 +1,130 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Phishing Detector Settings</title>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="options.css">
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="../images/icon32.png" class="logo" alt="Logo" id="logoImage">
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white" class="fallback-icon" id="fallbackIcon">
-        <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z"/>
-      </svg>
-      <h1>Phishing Detector Settings</h1>
-    </div>
-    
-    <div class="content">
-      <div id="notification" class="notification"></div>
-      
-      <div class="section">
-        <h2 class="section-title">General Settings</h2>
-        
-        <div class="form-group">
-          <div class="form-row">
-            <div>
-              <label for="enableRealTimeProtection">Real-time Protection</label>
-              <div class="description">Automatically check websites while browsing</div>
+  <head>
+    <title>Phishing Detector Settings</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          src="../images/icon32.png"
+          class="logo"
+          alt="Logo"
+          id="logoImage"
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="white"
+          class="fallback-icon"
+          id="fallbackIcon"
+        >
+          <path
+            d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z"
+          />
+        </svg>
+        <h1>Phishing Detector Settings</h1>
+      </div>
+
+      <div class="content">
+        <div id="notification" class="notification"></div>
+
+        <div class="section">
+          <h2 class="section-title">General Settings</h2>
+
+          <div class="form-group">
+            <div class="form-row">
+              <div>
+                <label for="enableRealTimeProtection"
+                  >Real-time Protection</label
+                >
+                <div class="description">
+                  Automatically check websites while browsing
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="enableRealTimeProtection" checked />
+                <span class="slider"></span>
+              </label>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="enableRealTimeProtection" checked>
-              <span class="slider"></span>
-            </label>
+          </div>
+
+          <div class="form-group">
+            <div class="form-row">
+              <div>
+                <label for="showExtendedInfo">Show Extended Information</label>
+                <div class="description">
+                  Display detailed feature information in popup
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="showExtendedInfo" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
           </div>
         </div>
-        
-        <div class="form-group">
-          <div class="form-row">
-            <div>
-              <label for="showExtendedInfo">Show Extended Information</label>
-              <div class="description">Display detailed feature information in popup</div>
+
+        <div class="section">
+          <h2 class="section-title">Detection Settings</h2>
+
+          <div class="form-group">
+            <label for="detectionThreshold">Detection Sensitivity</label>
+            <div class="description">
+              Adjust how sensitive the phishing detection is. Higher values
+              detect more sites but may have more false positives.
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="showExtendedInfo" checked>
-              <span class="slider"></span>
-            </label>
+
+            <input
+              type="range"
+              id="detectionThreshold"
+              min="0.3"
+              max="0.7"
+              step="0.01"
+              value="0.5"
+            />
+            <div class="range-value" id="thresholdValue">0.5</div>
           </div>
         </div>
-      </div>
-      
-      <div class="section">
-        <h2 class="section-title">Detection Settings</h2>
-        
-        <div class="form-group">
-          <label for="detectionThreshold">Detection Sensitivity</label>
-          <div class="description">Adjust how sensitive the phishing detection is. Higher values detect more sites but may have more false positives.</div>
-          
-          <input type="range" id="detectionThreshold" min="0.3" max="0.7" step="0.01" value="0.5">
-          <div class="range-value" id="thresholdValue">0.5</div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h2 class="section-title">Trusted Domains</h2>
-        
-        <div class="form-group">
-          <label for="whitelist">Whitelist (one domain per line)</label>
-          <div class="description">These domains will be trusted and not checked for phishing</div>
-          
-          <textarea id="whitelist" class="whitelist-area" placeholder="example.com
+
+        <div class="section">
+          <h2 class="section-title">Trusted Domains</h2>
+
+          <div class="form-group">
+            <label for="whitelist">Whitelist (one domain per line)</label>
+            <div class="description">
+              These domains will be trusted and not checked for phishing
+            </div>
+
+            <textarea
+              id="whitelist"
+              class="whitelist-area"
+              placeholder="example.com
 mybank.com
-trusted-site.org"></textarea>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h2 class="section-title">Advanced</h2>
-        
-        <div class="form-group">
-          <label for="updateFrequency">Model Update Frequency</label>
-          <div class="description">How often to check for model updates</div>
-          
-          <select id="updateFrequency">
-            <option value="daily">Daily</option>
-            <option value="weekly" selected>Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="never">Never (Not Recommended)</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <div class="form-row">
-            <div>
-              <label for="collectAnonymousStats">Anonymous Statistics</label>
-              <div class="description">Contribute anonymous usage data to improve detection</div>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="collectAnonymousStats" checked>
-              <span class="slider"></span>
-            </label>
+trusted-site.org"
+            ></textarea>
           </div>
         </div>
-      </div>
-      
-      <div class="actions">
-        <button id="resetBtn" class="btn-danger">Reset to Defaults</button>
-        <button id="cancelBtn" class="btn-secondary">Cancel</button>
-        <button id="saveBtn" class="btn-primary">Save Changes</button>
+
+        <div class="actions">
+          <button id="resetBtn" class="btn-danger">Reset to Defaults</button>
+          <button id="cancelBtn" class="btn-secondary">Cancel</button>
+          <button id="saveBtn" class="btn-primary">Save Changes</button>
+        </div>
       </div>
     </div>
-  </div>
-  
-  <div class="footer">
-    <p>Phishing Detector v1.0 (UCI ML) | <a href="#" id="aboutLink">About</a> | <a href="#" id="privacyLink">Privacy Policy</a></p>
-  </div>
-  
-  <script src="options.js"></script>
-</body>
+
+    <div class="footer">
+      <p>
+        Phishing Detector v1.0 (UCI ML) | <a href="#" id="aboutLink">About</a> |
+        <a href="#" id="privacyLink">Privacy Policy</a>
+      </p>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
 </html>

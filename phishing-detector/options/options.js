@@ -5,7 +5,6 @@ const defaultSettings = {
     showExtendedInfo: true,
     whitelist: [],
     updateFrequency: 'weekly',
-    collectAnonymousStats: true,
     lastReset: Date.now()
   };
   
@@ -73,15 +72,10 @@ const defaultSettings = {
     // Toggle switches
     document.getElementById('enableRealTimeProtection').checked = settings.enableRealTimeProtection;
     document.getElementById('showExtendedInfo').checked = settings.showExtendedInfo;
-    document.getElementById('collectAnonymousStats').checked = settings.collectAnonymousStats;
     
     // Whitelist
     const whitelistArea = document.getElementById('whitelist');
     whitelistArea.value = settings.whitelist.join('\n');
-    
-    // Update frequency
-    const updateFrequencySelect = document.getElementById('updateFrequency');
-    updateFrequencySelect.value = settings.updateFrequency;
   }
   
   // Get settings from form
@@ -90,7 +84,6 @@ const defaultSettings = {
     const detectionThreshold = parseFloat(document.getElementById('detectionThreshold').value);
     const enableRealTimeProtection = document.getElementById('enableRealTimeProtection').checked;
     const showExtendedInfo = document.getElementById('showExtendedInfo').checked;
-    const collectAnonymousStats = document.getElementById('collectAnonymousStats').checked;
     
     // Process whitelist
     const whitelistText = document.getElementById('whitelist').value;
@@ -118,8 +111,6 @@ const defaultSettings = {
       enableRealTimeProtection,
       showExtendedInfo,
       whitelist,
-      updateFrequency,
-      collectAnonymousStats,
       lastUpdated: Date.now()
     };
   }
@@ -216,10 +207,8 @@ const defaultSettings = {
         "Privacy Policy\n\n" +
         "Phishing Detector respects your privacy:\n\n" +
         "• We don't collect personal data\n" +
-        "• When enabled, anonymous statistics include only detection counts\n" +
         "• No browsing history is stored or shared\n" +
-        "• All analysis happens locally on your device\n\n" +
-        "You can disable anonymous statistics collection in settings."
+        "• All analysis happens locally on your device\n\n"
       );
     });
   }
